@@ -13,7 +13,7 @@ Opencv(3.4.1)
 
 Numpy
 
-## Useage
+## Usage
 To use this code, you should make a folder, which include two sub-folder : real_image and ani_images. you also need to make  "samples" and "wights"
 to save generated  images and weights.
     
