@@ -22,12 +22,13 @@ def weights_init(m):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--batchsize', type=int, default=16, help='input batch size')
+    parser.add_argument('--batchsize', type=int, default=32, help='input batch size')
 
     parser.add_argument('--epochs', type=int, default=200, help='number of epochs to train for')
     parser.add_argument('--lr', type=float, default=0.0001, help='learning rate, default=0.0002')
     parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
-    parser.add_argument('--lamda', type=float, default=8, help='')
+    parser.add_argument('--lamda', type=float, default=2, help='the weight of perceptual loss')
+    parser.add_argument('--ngpu', type=int, default=2, help='number of GPU')
 
     opt = parser.parse_args()
     print(opt)
@@ -48,12 +49,17 @@ def main():
     # D_net.apply(weights_init)
 
 
+
     Vgg_model = torchvision.models.vgg19(pretrained=True)
     Vgg = nn.Sequential(*list(Vgg_model.features)[:26])
     Vgg.to(device)
     for param in Vgg.parameters():
         param.requires_grad = False
 
+    if opt.ngpu > 1:
+        G_net = nn.DataParallel(G_net)
+        D_net = nn.DataParallel(D_net)
+        Vgg = nn.DataParallel(Vgg)
     criterion = nn.L1Loss().to(device)
     criterionMSE = nn.MSELoss().to(device)
 
@@ -143,7 +149,7 @@ def main():
                           update="new",
                           opts=dict(title="D_loss",legend=["D_loss", "d_fake", "d_real"]),  win=lined,
                 env="D_Loss")
-        if (epoch+1) % 3 == 0:
+        if (epoch+1) % 5 == 0:
             torch.save(G_net.state_dict(), "weights_b/" + str(epoch) + ".pkl")
 
 
