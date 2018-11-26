@@ -27,7 +27,7 @@ def main():
     parser.add_argument('--epochs', type=int, default=200, help='number of epochs to train for')
     parser.add_argument('--lr', type=float, default=0.0001, help='learning rate, default=0.0002')
     parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
-    parser.add_argument('--lamda', type=float, default=1, help='')
+    parser.add_argument('--lamda', type=float, default=8, help='')
 
     opt = parser.parse_args()
     print(opt)
@@ -102,7 +102,7 @@ def main():
             #perceptual loss
             per_loss = criterion(Vgg(fake_ani),Vgg(real_img))
 
-            G_loss =  opt.lamda * per_loss
+            G_loss =  g_loss + opt.lamda * per_loss
 
             G_loss.backward()
             G_optimizer.step()
