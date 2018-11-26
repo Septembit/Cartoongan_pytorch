@@ -6,8 +6,11 @@ Implementation of [CartoonGan](http://openaccess.thecvf.com/content_cvpr_2018/pa
 
 ## Prerequisite
 Pytorch(0.4.1)
+
 Visdom(if loss visualization  required)
+
 Opencv(3.4.1)
+
 Numpy
 
 ## Useage
