@@ -22,13 +22,13 @@ def weights_init(m):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--batchsize', type=int, default=32, help='input batch size')
-
+    parser.add_argument('--batchsize', type=int, default=24, help='input batch size')
+    parser.add_argument('--imgdir', type=str, default="/home/yachao-li/Downloads/", help='path of  images')
     parser.add_argument('--epochs', type=int, default=200, help='number of epochs to train for')
     parser.add_argument('--lr', type=float, default=0.0001, help='learning rate, default=0.0002')
     parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
-    parser.add_argument('--lamda', type=float, default=2, help='the weight of perceptual loss')
-    parser.add_argument('--ngpu', type=int, default=2, help='number of GPU')
+    parser.add_argument('--lamda', type=float, default=4, help='the weight of perceptual loss')
+    parser.add_argument('--ngpu', type=int, default=1, help='number of GPU')
 
     opt = parser.parse_args()
     print(opt)
@@ -37,8 +37,8 @@ def main():
     lineg = vis.line(Y=np.arange(10), env="G_Loss")
     lined = vis.line(Y=np.arange(10), env="D_Loss")
 
-    real_image_dataset = image_dataset(path="/home/yachao-li/Downloads/")
-    ani_image_dataset = image_dataset(path="/home/yachao-li/Downloads/", type="ani_images/")
+    real_image_dataset = image_dataset(path=opt.imgdir)
+    ani_image_dataset = image_dataset(path=opt.imgdir, type="ani_images/")
     real_image_loader = DataLoader(real_image_dataset, batch_size=opt.batchsize, shuffle=True, num_workers=2)
     ani_image_loader = DataLoader(ani_image_dataset, batch_size=opt.batchsize, shuffle=True, num_workers=2, drop_last=True)
 
@@ -56,7 +56,7 @@ def main():
     for param in Vgg.parameters():
         param.requires_grad = False
 
-    if opt.ngpu > 1:
+    if opt.ngpu > 2:
         G_net = nn.DataParallel(G_net)
         D_net = nn.DataParallel(D_net)
         Vgg = nn.DataParallel(Vgg)
@@ -121,9 +121,9 @@ def main():
             d_loss_realani_list.append(d_loss_realani.item())
 
             if i % 40 == 0:
-                torchvision.utils.save_image((fake_ani), 'samples_b/' +"genepoch" + str(epoch+1) + "batch" + str(i + 1) + '.jpg', normalize=True)
-                torchvision.utils.save_image((real_img), 'samples_b/' +"realepoch" + str(epoch+1) + "batch" + str(i + 1) + '.jpg', normalize=True)
-                torchvision.utils.save_image((ani_img), 'samples_b/' +"aniepoch" + str(epoch+1) + "batch" + str(i + 1) + '.jpg', normalize=True)
+                torchvision.utils.save_image((fake_ani), 'samples/' +"genepoch" + str(epoch+1) + "batch" + str(i + 1) + '.jpg', normalize=True)
+                torchvision.utils.save_image((real_img), 'samples/' +"realepoch" + str(epoch+1) + "batch" + str(i + 1) + '.jpg', normalize=True)
+                torchvision.utils.save_image((ani_img), 'samples/' +"aniepoch" + str(epoch+1) + "batch" + str(i + 1) + '.jpg', normalize=True)
 
                 G_loss = sum(G_loss_list) / len(G_loss_list)
                 D_loss = sum(D_loss_list) / len(D_loss_list)
@@ -150,7 +150,7 @@ def main():
                           opts=dict(title="D_loss",legend=["D_loss", "d_fake", "d_real"]),  win=lined,
                 env="D_Loss")
         if (epoch+1) % 5 == 0:
-            torch.save(G_net.state_dict(), "weights_b/" + str(epoch) + ".pkl")
+            torch.save(G_net.state_dict(), "weights/" + str(epoch) + ".pkl")
 
 
 
