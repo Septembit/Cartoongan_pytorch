@@ -27,7 +27,7 @@ def main():
     parser.add_argument('--epochs', type=int, default=200, help='number of epochs to train for')
     parser.add_argument('--lr', type=float, default=0.0001, help='learning rate, default=0.0002')
     parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
-    parser.add_argument('--lamda', type=float, default=0.02, help='')
+    parser.add_argument('--lamda', type=float, default=1, help='')
 
     opt = parser.parse_args()
     print(opt)
@@ -43,6 +43,7 @@ def main():
 
     G_net = Generator(in_dim=3).to(device)
     D_net = discriminator(in_dim=3).to(device)
+    G_net.load_state_dict(torch.load("weights_b/G_init.pkl"))
     # G_net.apply(weights_init)
     # D_net.apply(weights_init)
 
@@ -56,7 +57,7 @@ def main():
     criterion = nn.L1Loss().to(device)
     criterionMSE = nn.MSELoss().to(device)
 
-    G_optimizer = Adam(G_net.parameters(), lr=opt.lr, betas=(0.9,0.999))
+    G_optimizer = Adam(G_net.parameters(), lr=opt.lr, betas=(0.5,0.999))
     D_optimizer = Adam(D_net.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
     G_net.train()
     D_net.train()
@@ -101,7 +102,7 @@ def main():
             #perceptual loss
             per_loss = criterion(Vgg(fake_ani),Vgg(real_img))
 
-            G_loss = g_loss + opt.lamda * per_loss
+            G_loss =  opt.lamda * per_loss
 
             G_loss.backward()
             G_optimizer.step()
